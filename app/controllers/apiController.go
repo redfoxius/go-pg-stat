@@ -11,7 +11,14 @@ import (
 
 func GetRecords(c *fiber.Ctx) error {
 	filters := services.BuildFilter(c)
-	repo := stat.New(database.GetDB())
+
+	db, err := database.GetDB()
+
+	if err != nil {
+		return err
+	}
+
+	repo := stat.New(db)
 
 	statInfo, err := repo.GetStat(context.Background(), filters)
 

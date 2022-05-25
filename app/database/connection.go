@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"log"
 	"os"
 )
 
@@ -13,22 +12,22 @@ var (
 	dbError    error
 )
 
-func GetDB() *gorm.DB {
+func GetDB() (*gorm.DB, error) {
 	if dbInstance == nil {
 		return Connect()
 	}
 
-	return dbInstance
+	return dbInstance, nil
 }
 
-func Connect() *gorm.DB {
+func Connect() (*gorm.DB, error) {
 	dbInstance, dbError = gorm.Open(postgres.Open(GetConnectionString()), &gorm.Config{})
 
 	if dbError != nil {
-		log.Fatal("DB conn: ", dbError)
+		return nil, dbError
 	}
 
-	return dbInstance
+	return dbInstance, nil
 }
 
 func GetConnectionString() string {

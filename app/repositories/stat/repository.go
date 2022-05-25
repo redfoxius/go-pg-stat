@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/redfoxius/go-pg-stat/app/repositories/stat/models"
 	"gorm.io/gorm"
+	"strings"
 )
 
 type StatRepository interface {
@@ -25,7 +26,7 @@ func (r *repository) GetStat(ctx context.Context, filter models.StatFilter) (*mo
 	query := r.db.WithContext(ctx)
 
 	if filter.Type != "" {
-		query = query.Where("lower(query) like ?", filter.Type+`%`)
+		query = query.Where("lower(query) like ?", strings.ToLower(filter.Type)+`%`)
 	}
 
 	if filter.Sort == `fast` {
