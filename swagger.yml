@@ -1,0 +1,81 @@
+openapi: 3.0.1
+info:
+  title: Go PostgreSQL stat analyzer
+  description: Test API key - 6486f5a885b64241602b0a16ca2589de
+  contact:
+    email: redfoxius@gmail.com
+  license:
+    name: Alexander Kolomoyets
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+  version: 0.0.1
+servers:
+  - url: 'http://127.0.0.1:13013'
+paths:
+  '/api/stat/get':
+    get:
+      summary: Get query stat
+      security:
+        - ApiKeyAuth: [6486f5a885b64241602b0a16ca2589de]
+      parameters:
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: string
+          example: 1
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: string
+          example: 10
+        - in: query
+          name: sort
+          required: false
+          schema:
+            type: string
+            enum:
+              - fast
+              - slow
+          example: slow
+        - in: query
+          name: type
+          required: false
+          schema:
+            type: string
+            enum:
+              - select
+              - insert
+              - update
+              - delete
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/QueryItem'
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+  schemas:
+    QueryItem:
+      type: object
+      properties:
+        query:
+          type: string
+        max_time:
+          type: number
+        mean_time:
+          type: number

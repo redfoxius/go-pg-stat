@@ -2,7 +2,7 @@ package middlewares
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/redfoxius/go-pg-stat/dto"
+	"github.com/redfoxius/go-pg-stat/app/dto"
 )
 
 const apiKey = "6486f5a885b64241602b0a16ca2589de"
