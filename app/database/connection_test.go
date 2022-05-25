@@ -92,8 +92,8 @@ func TestGetDB(t *testing.T) {
 
 			res, err := GetDB()
 
-			assert.Equal(t, res == nil, test.resEmpty)
-			assert.Equal(t, err == nil, test.errEmpty)
+			assert.Equalf(t, res == nil, test.resEmpty, `check empty result`)
+			assert.Equalf(t, err == nil, test.errEmpty, `check empty error`)
 
 			test.dropEnv()
 		})
