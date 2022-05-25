@@ -4,54 +4,74 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/redfoxius/go-pg-stat/app/repositories/stat/models"
 	"github.com/stretchr/testify/assert"
-	"net/http/httptest"
+	"github.com/valyala/fasthttp"
+	"net/url"
 	"testing"
 )
 
 func TestBuildFilter(t *testing.T) {
-	app := fiber.New()
+	types := [5]string{
+		"", "select", "insert", "update", "delete",
+	}
+	sorts := [2]string{
+		"fast", "slow",
+	}
 
-	app.Get("/api/stat/get", func(c *fiber.Ctx) error {
-		testFilter := BuildFilter(c)
+	for _, r := range types {
+		for _, s := range sorts {
+			queryParams := map[string]string{
+				"type":  r,
+				"sort":  s,
+				"page":  "2",
+				"limit": "5",
+			}
 
-		sampleFilter := models.StatFilter{
-			Type:  "select",
-			Sort:  "fast",
-			Page:  1,
-			Limit: 10,
+			q := make(url.Values)
+			for key, value := range queryParams {
+				q.Add(key, value)
+			}
+
+			var ctx fasthttp.RequestCtx
+			var req fasthttp.Request
+			req.SetRequestURI("http://unit.test/queries?" + q.Encode())
+			ctx.Init(&req, nil, nil)
+			testFilter := BuildFilter(fiber.New().AcquireCtx(&ctx))
+
+			sampleFilter := models.StatFilter{
+				Type:  r,
+				Sort:  s,
+				Page:  2,
+				Limit: 5,
+			}
+
+			assert.Equal(t, testFilter, sampleFilter)
 		}
-
-		assert.Equal(t, testFilter, sampleFilter)
-
-		return nil
-	})
-
-	req := httptest.NewRequest(fiber.MethodGet, "/api/stat/get=fast&type=select", nil)
-
-	_, err := app.Test(req)
-	assert.Equal(t, nil, err, "app.Test(req)")
+	}
 }
 
 func TestBuildFilterFixed(t *testing.T) {
-	app := fiber.New()
+	sampleFilter := models.StatFilter{
+		Type:  "",
+		Sort:  "slow",
+		Page:  1,
+		Limit: 10,
+	}
 
-	app.Get("/api/stat/get", func(c *fiber.Ctx) error {
-		testFilter := BuildFilter(c)
+	queryParams := map[string]string{
+		"type": "qqq",
+		"sort": "www",
+	}
 
-		sampleFilter := models.StatFilter{
-			Type:  "",
-			Sort:  "slow",
-			Page:  2,
-			Limit: 5,
-		}
+	q := make(url.Values)
+	for key, value := range queryParams {
+		q.Add(key, value)
+	}
 
-		assert.Equal(t, testFilter, sampleFilter)
+	var ctx fasthttp.RequestCtx
+	var req fasthttp.Request
+	req.SetRequestURI("http://unit.test/queries?" + q.Encode())
+	ctx.Init(&req, nil, nil)
+	testFilter := BuildFilter(fiber.New().AcquireCtx(&ctx))
 
-		return nil
-	})
-
-	req := httptest.NewRequest(fiber.MethodGet, "/api/stat/get=qqq&type=www&page=2&limit=5", nil)
-
-	_, err := app.Test(req)
-	assert.Equal(t, nil, err, "app.Test(req)")
+	assert.Equal(t, testFilter, sampleFilter)
 }
